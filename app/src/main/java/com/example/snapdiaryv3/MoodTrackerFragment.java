@@ -5,15 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,22 +22,11 @@ public class MoodTrackerFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private DiaryAdapter diaryAdapter;
-    private DatabaseReference diaryRef;
-    private FirebaseAuth mAuth;
-
-
-    private List<DiaryEntry> diaryEntries;
-    private List<String> notifications;
     private TextView notificationTextView;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private String description;
-    private float moodLevel;
-    private String imageUri;
-    private String audioUri;
-    private long timestamp; // Timestamp in milliseconds
     private String mParam1;
     private String mParam2;
 
@@ -61,14 +46,8 @@ public class MoodTrackerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
-        // Initialize your data lists
-        diaryEntries = new ArrayList<>();
-        notifications = new ArrayList<>();
+        // Initialize your adapter here if necessary
+        diaryAdapter = new DiaryAdapter(requireContext(), new ArrayList<>()); // Ensure diaryEntries are populated
     }
 
     @Override
@@ -76,48 +55,37 @@ public class MoodTrackerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_mood_tracker, container, false);
         notificationTextView = view.findViewById(R.id.notificationTextView);
+        recyclerView = view.findViewById(R.id.recyclerView);
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        loadDiaryEntries();
-    }
+        // Assuming you have already set up your RecyclerView and DiaryAdapter
+        recyclerView.setAdapter(diaryAdapter);
 
-    private void loadDiaryEntries() {
-        // Mock data loading, replace this with actual data fetching logic
-        diaryEntries = getDiaryEntriesFromAdapter();
-
+        // Calculate and display average mood
         float averageMood = calculateAverageMood();
         displayNotification(averageMood);
     }
 
-    private List<DiaryEntry> getDiaryEntriesFromAdapter() {
-        // Fetch entries from your DiaryAdapter
-        List<DiaryEntry> entries = new ArrayList<>();
-
-        // Example: Retrieve entries from the adapter (assuming diaryAdapter is initialized)
-        // Replace with actual method to get entries from your adapter
-        if (diaryAdapter != null) {
-            entries = diaryAdapter.getDiaryEntries();
-        }
-
-        // Mock data for demonstration, using the correct constructor
-        entries.add(new DiaryEntry("Entry 1", 3.0f, null, null, System.currentTimeMillis(), null));
-        entries.add(new DiaryEntry("Entry 2", 4.5f, null, null, System.currentTimeMillis(), null));
-        entries.add(new DiaryEntry("Entry 3", 1.0f, null, null, System.currentTimeMillis(), null));
-
-        return entries;
-    }
-
-
     private float calculateAverageMood() {
-        float totalMood = 0;
-        for (DiaryEntry entry : diaryEntries) {
-            totalMood += entry.getMoodLevel();
+        List<DiaryEntry> entries = diaryAdapter.getDiaryEntries();
+        if (entries.isEmpty()) {
+            return 0; // Return 0 if no entries are found
         }
-        return totalMood / diaryEntries.size();
+
+        int count = Math.min(entries.size(), 3); // Calculate average for up to 3 entries
+        float totalMood = 0;
+
+        // Calculate sum of mood levels for the last 3 entries
+        for (int i = entries.size() - 1; i >= Math.max(0, entries.size() - 3); i--) {
+            totalMood += entries.get(i).getMoodLevel();
+        }
+
+        // Calculate average mood
+        return totalMood / count;
     }
 
     private void displayNotification(float averageMood) {
@@ -125,9 +93,6 @@ public class MoodTrackerFragment extends Fragment {
         String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
 
         String notificationEntry = timestamp + " - " + notificationMessage;
-        notifications.add(notificationEntry);
-
-        // Display the latest notification
         notificationTextView.setText(notificationEntry);
 
         // Save notifications persistently if needed (e.g., using SharedPreferences, database, etc.)

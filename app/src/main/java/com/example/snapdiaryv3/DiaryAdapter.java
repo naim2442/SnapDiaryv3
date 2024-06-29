@@ -61,9 +61,7 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryViewHol
         DiaryEntry entry = diaryEntries.get(position);
         holder.textViewDescription.setText(entry.getDescription());
         holder.ratingBarMood.setRating(entry.getMoodLevel());
-
-
-            holder.ratingBarMood.setIsIndicator(true); // Disable RatingBar
+        holder.ratingBarMood.setIsIndicator(true); // Disable RatingBar
 
         if (entry.getImageUri() != null) {
             holder.imageViewPhoto.setVisibility(View.VISIBLE);
