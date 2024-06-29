@@ -1,7 +1,5 @@
 package com.example.snapdiaryv3;
 
-import static android.app.PendingIntent.getActivity;
-
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,8 +15,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.example.snapdiaryv3.R;
-
 
 public class ProfileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -67,6 +63,8 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
             selectedFragment = new MoodTrackerFragment();
         } else if (itemId == R.id.nav_user_profile) {
             selectedFragment = new UserProfileFragment();
+        } else if (itemId == R.id.nav_reminder) { // Added new case for ReminderFragment
+            selectedFragment = new ReminderFragment();
         }
 
         if (selectedFragment != null) {
