@@ -65,7 +65,8 @@
                 android:layout_height="wrap_content"
                 android:numStars="5"
                 android:rating="3"
-                android:stepSize="1" />
+                android:stepSize="1"
+                android:isIndicator="true"/>
 
             <ImageView
                 android:id="@+id/imageViewPhoto"
@@ -73,7 +74,7 @@
                 android:layout_height="231dp"
                 android:layout_marginTop="8dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/snapdiarylogo" />
+               />
 
             <!-- Audio button -->
             <Button
