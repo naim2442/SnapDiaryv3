@@ -31,6 +31,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -46,6 +48,8 @@ public class CreateDiaryFragment extends Fragment {
 
     private static final String TAG = "CreateDiaryFragment";
     private RatingBar ratingBarMood;
+
+    private static final int REQUEST_LOCATION_PERMISSION = 300;
 
     private EditText editTextDescription;
     private Button buttonCamera, buttonSelectImage, buttonRecordAudio, buttonStopAudio, buttonPlaybackAudio, buttonSave, buttonReset;
@@ -98,7 +102,7 @@ public class CreateDiaryFragment extends Fragment {
         buttonRecordAudio.setOnClickListener(v -> checkAudioPermissionsAndStartRecording());
         buttonStopAudio.setOnClickListener(v -> stopRecording());
         buttonPlaybackAudio.setOnClickListener(v -> playRecording());
-        buttonSave.setOnClickListener(v -> saveDiary());
+        buttonSave.setOnClickListener(v -> checkLocationPermissionsAndSaveDiary());
         buttonReset.setOnClickListener(v->resetInputs());
 
         imageCaptureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -127,18 +131,36 @@ public class CreateDiaryFragment extends Fragment {
                 });
     }
 
-    private void checkCameraPermissionsAndTakePicture() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(requireActivity(),
-                    new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                    REQUEST_CAMERA_PERMISSION);
+    private void checkLocationPermissionsAndSaveDiary() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
         } else {
-            dispatchTakePictureIntent();
+            saveDiaryWithLocation();
         }
     }
+
+    private void saveDiaryWithLocation() {
+        FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    saveDiary(latitude, longitude);
+                } else {
+                    Toast.makeText(requireContext(), "Unable to retrieve location", Toast.LENGTH_SHORT).show();
+                    // Save diary without location if location is not available
+                    saveDiary(null, null);
+                }
+            });
+        }
+    }
+
+
+
+
     private void takePicture() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
@@ -157,8 +179,17 @@ public class CreateDiaryFragment extends Fragment {
             } else {
                 Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show();
             }
+        } else if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                saveDiaryWithLocation();
+            } else {
+                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
+                // Save diary without location if permission is denied
+                saveDiary(null, null);
+            }
         }
     }
+
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
@@ -333,7 +364,7 @@ public class CreateDiaryFragment extends Fragment {
         }
     }
 
-    private void saveDiary() {
+    private void saveDiary(Double latitude, Double longitude) {
         String description = editTextDescription.getText().toString().trim();
         float moodLevel = ratingBarMood.getRating();
 
@@ -351,7 +382,7 @@ public class CreateDiaryFragment extends Fragment {
         long timestamp = System.currentTimeMillis();
         String audioUri = "some_uri";
         DiaryEntry diaryEntry = new DiaryEntry(description, moodLevel,
-                imageUri != null ? imageUri.toString() : null, audioFilePath, timestamp, audioFilePath); // Make sure audioFilePath is correctly set here
+                imageUri != null ? imageUri.toString() : null, audioFilePath, timestamp, audioFilePath, latitude, longitude); // Make sure audioFilePath is correctly set here
 
         diaryRef.child(entryId).setValue(diaryEntry)
                 .addOnSuccessListener(aVoid -> {

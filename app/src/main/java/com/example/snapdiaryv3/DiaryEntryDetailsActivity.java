@@ -2,6 +2,7 @@ package com.example.snapdiaryv3;
 
 import static androidx.core.content.ContentProviderCompat.requireContext;
 
+
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -41,6 +42,8 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
     private String userId;
 
     private TextView textViewDescription;
+
+    private TextView textViewLocation;
     private RatingBar ratingBarMood;
     private ImageView imageViewPhoto;
     private TextView textViewTimestamp;
@@ -78,6 +81,7 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
         imageViewPhoto = findViewById(R.id.imageViewPhoto);
         textViewTimestamp = findViewById(R.id.textViewTimestamp);
         buttonPlaybackAudio = findViewById(R.id.buttonPlaybackAudio);
+        textViewLocation = findViewById(R.id.textViewLocation);
 
         String entryId = getIntent().getStringExtra("entryId");
 
@@ -126,11 +130,19 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
                         imageViewPhoto.setVisibility(View.GONE);
                     }
 
-                    audioFilePath = entry.getAudioFilePath(); // Ensure audioFilePath is correctly retrieved
+                    audioFilePath = entry.getAudioFilePath();
 
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
                     String dateString = sdf.format(new Date(entry.getTimestamp()));
                     textViewTimestamp.setText(dateString);
+
+                    // Display location if available
+                    if (entry.getLatitude() != null && entry.getLongitude() != null) {
+                        // Call GeocodingHelper to fetch location name
+                        GeocodingHelper.displayLocationName(DiaryEntryDetailsActivity.this, entry.getLatitude(), entry.getLongitude(), textViewLocation);
+                    } else {
+                        textViewLocation.setText("Location not available");
+                    }
                 } else {
                     Toast.makeText(DiaryEntryDetailsActivity.this, "Entry not found", Toast.LENGTH_SHORT).show();
                 }
@@ -142,6 +154,8 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
             }
         });
     }
+
+
 
     @Override
     public void onEntryDetailsClicked(DiaryEntry entry) {

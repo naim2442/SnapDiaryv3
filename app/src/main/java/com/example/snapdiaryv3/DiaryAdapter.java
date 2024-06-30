@@ -107,7 +107,7 @@ public class DiaryAdapter extends RecyclerView.Adapter<DiaryAdapter.DiaryViewHol
         return diaryEntries.size();
     }
 
-    public static class DiaryViewHolder extends RecyclerView.ViewHolder {
+    public static class DiaryViewHolder extends RecyclerView.ViewHolder  {
 
         TextView textViewDescription;
         RatingBar ratingBarMood;

@@ -94,6 +94,13 @@
                 android:text="Timestamp"
                 android:textAppearance="?android:textAppearanceSmall" />
 
+            <TextView
+                android:id="@+id/textViewLocation"
+                android:layout_width="match_parent"
+                android:layout_height="59dp"
+                android:text="Location"
+                android:textAppearance="?android:textAppearanceSmall" />
+
             <!-- Delete button -->
 
         </LinearLayout>

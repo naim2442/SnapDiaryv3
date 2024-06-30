@@ -41,6 +41,7 @@ dependencies {
     annotationProcessor 'androidx.room:room-compiler:2.6.1'
 
     // Google Play Services and Firebase
+
     implementation 'com.google.android.gms:play-services-maps:18.0.0'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.google.firebase:firebase-database:21.0.0'
