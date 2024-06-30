@@ -17,6 +17,10 @@
         android:icon="@drawable/ic_add"
         android:title="@string/menu_mood_tracker" />
     <item
+        android:id="@+id/nav_map"
+        android:icon="@drawable/map_icon"
+        android:title="@string/menu_map_tracker"/>
+    <item
         android:id="@+id/nav_user_profile"
         android:icon="@drawable/baseline_person_24"
         android:title="@string/menu_user_profile" />

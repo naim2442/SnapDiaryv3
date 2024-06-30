@@ -8,5 +8,6 @@
     <string name="menu_create_diary">Create Diary</string>
     <string name="menu_saved_diaries">Saved Diaries</string>
     <string name="menu_mood_tracker">Mood Tracker</string>
+    <string name="menu_map_tracker">Map Tracker</string>
     <string name="menu_user_profile">User Profile</string>
 </resources>

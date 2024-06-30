@@ -23,8 +23,10 @@ public class SectionsPagerAdapter extends FragmentStateAdapter {
             case 3:
                 return new MoodTrackerFragment();
             case 4:
-                return new UserProfileFragment();
+                return new MapFragment();
             case 5:
+                return new UserProfileFragment();
+            case 6:
                 return new ReminderFragment();  // Added the new fragment here
             default:
                 return new HomeFragment();

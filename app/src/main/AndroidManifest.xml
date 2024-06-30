@@ -3,21 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.snapdiaryv3">
 
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
-
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"
-        tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
-
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -27,11 +15,15 @@
         android:maxSdkVersion="32"
         tools:ignore="ScopedStorage" />
 
+    <!-- Features -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
 
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-
+    <!-- Application definition -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -43,6 +35,32 @@
         android:theme="@style/Theme.SnapDiaryv3"
         tools:targetApi="31">
 
+        <!-- API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAvktvZMwSDAGbmqg4hIIMug8ApH-L4bzU"/>
+
+        <!-- Activities -->
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".ProfileActivity" />
+        <activity
+            android:name=".DiaryEntryDetailsActivity"
+            android:label="Diary Entry Details"
+            android:parentActivityName=".SavedDiariesFragment">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SavedDiariesFragment" />
+        </activity>
+
+        <!-- Services and Receivers -->
         <receiver
             android:name=".ReminderBroadcastReceiver"
             android:enabled="true"
@@ -51,11 +69,11 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <service
             android:name=".ReminderService"
             android:exported="false" />
 
+        <!-- Providers -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.snapdiaryv3.fileprovider"
@@ -65,7 +83,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.snapdiaryv3.fileprovider"
@@ -75,7 +92,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -86,31 +102,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
-
-    <!-- Diary Entry Details Activity -->
-        <activity
-            android:name=".DiaryEntryDetailsActivity"
-            android:label="Diary Entry Details"
-            android:parentActivityName=".SavedDiariesFragment">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SavedDiariesFragment" />
-        </activity>
-
-        <!-- Activities -->
-        <activity android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".ProfileActivity" />
-
     </application>
-
 </manifest>

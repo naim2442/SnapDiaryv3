@@ -3,19 +3,28 @@ package com.example.snapdiaryv3;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private EditText emailField, passwordField, confirmPasswordField;
-    private Toolbar toolbar;
+
+    private ImageButton backButton;
+    private ImageView logo;
+    private TextView title;
+    private EditText emailEditText;
+    private EditText passwordEditText;
+    private EditText confirmPasswordEditText;
+    private Button signUpButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,46 +32,48 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
-        emailField = findViewById(R.id.editText);
-        passwordField = findViewById(R.id.editText2);
-        confirmPasswordField = findViewById(R.id.editTextConfirmPassword);
 
-        // Setup toolbar
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        backButton = findViewById(R.id.backButton);
+        logo = findViewById(R.id.logo);
+        title = findViewById(R.id.title);
+        emailEditText = findViewById(R.id.editText);
+        passwordEditText = findViewById(R.id.editText2);
+        confirmPasswordEditText = findViewById(R.id.editTextConfirmPassword);
+        signUpButton = findViewById(R.id.button3);
 
-        // Enable the back button in the toolbar
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        // Set click listener for back button
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        signUpButton.setOnClickListener(v -> createUser());
+        backButton.setOnClickListener(v -> finish());
     }
 
-    public void createUser(View v) {
-        String email = emailField.getText().toString().trim();
-        String password = passwordField.getText().toString().trim();
-        String confirmPassword = confirmPasswordField.getText().toString().trim();
+    private void createUser() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+        String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "Email, Password, or Confirm Password cannot be empty", Toast.LENGTH_SHORT).show();
-            return;
+        if (validateInput(email, password, confirmPassword)) {
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this, "Registration successful. Please login to continue.", Toast.LENGTH_LONG).show();
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            navigateToLogin(true);
+                        } else {
+                            Toast.makeText(RegisterActivity.this, "Authentication failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+        } else {
+            Toast.makeText(this, "Please check your email and passwords", Toast.LENGTH_LONG).show();
         }
+    }
 
-        if (!password.equals(confirmPassword)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private boolean validateInput(String email, String password, String confirmPassword) {
+        return email.contains("@") && password.length() > 6 && password.equals(confirmPassword);
+    }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, LoginActivity.class));
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void navigateToLogin(boolean fromRegister) {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.putExtra("fromRegister", fromRegister);
+        startActivity(intent);
+        finish();
     }
 }

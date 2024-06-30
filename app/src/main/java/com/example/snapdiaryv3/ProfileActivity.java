@@ -61,6 +61,8 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
             selectedFragment = new SavedDiariesFragment();
         } else if (itemId == R.id.nav_mood_tracker) {
             selectedFragment = new MoodTrackerFragment();
+        } else if (itemId == R.id.nav_map) {
+            selectedFragment = new MapFragment();
         } else if (itemId == R.id.nav_user_profile) {
             selectedFragment = new UserProfileFragment();
         } else if (itemId == R.id.nav_reminder) { // Added new case for ReminderFragment
