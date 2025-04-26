@@ -1,108 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:layout_margin="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    style="@style/DiaryCard">
 
-    <View
-        android:id="@+id/spacerView"
-        android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:background="@android:color/transparent"
-        android:clickable="true"
-        android:visibility="invisible" />
-
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:padding="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Timestamp with icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal">
-
-            <!-- Your diary entry content -->
-            <TextView
-                android:id="@+id/textViewDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:text="Description" />
-
-            <!-- RatingBar -->
-            <RatingBar
-                android:id="@+id/ratingBarMood"
-                android:layout_width="380dp"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:rating="3"
-                android:stepSize="1"
-                style="@style/CustomRatingBar"/>
-
-            <!-- Photo -->
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+            
             <ImageView
-                android:id="@+id/imageViewPhoto"
-                android:layout_width="match_parent"
-                android:layout_height="51dp"
-                android:layout_marginTop="8dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/snapdiarylogo" />
-
-            <!-- Audio button (play), if needed -->
-            <Button
-                android:id="@+id/buttonPlayAudio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Play Audio"
-                android:visibility="gone"
-                style="@style/LightBlueButtonStyle" />
-
-            <!-- Buttons (Delete and Details) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/buttonDelete"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Delete"
-                    style="@style/LightBlueButtonStyle"
-                    android:layout_marginTop="8dp"
-                    />
-
-                <Button
-                    android:id="@+id/buttonDetails"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Details"
-                    style="@style/LightBlueButtonStyle"
-                    android:layout_marginTop="8dp"
-                   />
-
-            </LinearLayout>
-
-            <!-- Timestamp -->
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/baseline_timer_24"
+                app:tint="@color/on_surface_variant"
+                android:layout_marginEnd="4dp"/>
+                
             <TextView
                 android:id="@+id/textViewTimestamp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceSmall"
+                android:textAppearance="@style/TextAppearance.SnapDiary.BodyMedium"
+                android:textColor="@color/on_surface_variant"
                 android:text="Timestamp" />
-
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
-</LinearLayout>
+        <!-- Description -->
+        <TextView
+            android:id="@+id/textViewDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.SnapDiary.BodyLarge"
+            android:textColor="@color/on_surface"
+            android:text="Description"
+            android:layout_marginBottom="12dp"
+            android:maxLines="3"
+            android:ellipsize="end" />
+
+        <!-- Mood Rating -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mood:"
+                android:textAppearance="@style/TextAppearance.SnapDiary.BodyMedium"
+                android:layout_marginEnd="8dp"/>
+                
+            <RatingBar
+                android:id="@+id/ratingBarMood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:rating="3"
+                android:stepSize="1"
+                android:isIndicator="true"
+                style="@style/CustomRatingBar"/>
+        </LinearLayout>
+
+        <!-- Photo with rounded corners -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageViewPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.SnapDiary.MediumComponent"
+            android:src="@drawable/snapdiarylogo"
+            android:visibility="visible" />
+
+        <!-- Audio button (play) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPlayAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play Audio"
+            app:icon="@drawable/ic_play_audio"
+            android:layout_gravity="center"
+            android:layout_marginBottom="12dp"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:visibility="gone" />
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                app:icon="@drawable/ic_delete"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:textColor="@color/error"
+                app:iconTint="@color/error"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Details"
+                app:icon="@drawable/ic_details"
+                style="@style/Widget.Material3.Button.TextButton" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

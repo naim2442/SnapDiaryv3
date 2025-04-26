@@ -30,9 +30,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.snapdiaryv3.viewmodel.DiaryViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -43,6 +48,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class CreateDiaryFragment extends Fragment {
 
@@ -51,17 +57,16 @@ public class CreateDiaryFragment extends Fragment {
 
     private static final int REQUEST_LOCATION_PERMISSION = 300;
 
-    private EditText editTextDescription;
-    private Button buttonCamera, buttonSelectImage, buttonRecordAudio, buttonStopAudio, buttonPlaybackAudio, buttonSave, buttonReset;
+    private TextInputEditText editTextDescription;
+    private MaterialButton buttonCamera, buttonSelectImage, buttonRecordAudio, buttonStopAudio, buttonPlaybackAudio, buttonSave, buttonReset;
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
     private Uri imageUri;
-    private DatabaseReference databaseReference;
-    private DatabaseReference diaryRef;
     private FirebaseAuth mAuth;
+    private DiaryViewModel diaryViewModel;
 
     private ActivityResultLauncher<Intent> imageCaptureLauncher;
     private ActivityResultLauncher<Intent> imagePickLauncher;
@@ -81,11 +86,11 @@ public class CreateDiaryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mAuth = FirebaseAuth.getInstance();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        databaseReference = database.getReference();
-        String userId = mAuth.getCurrentUser().getUid();
-        diaryRef = databaseReference.child("diaries").child(userId);
+        
+        // Initialize ViewModel
+        diaryViewModel = new ViewModelProvider(this).get(DiaryViewModel.class);
 
+        // Initialize UI components
         editTextDescription = view.findViewById(R.id.editTextDescription);
         buttonCamera = view.findViewById(R.id.buttonCamera);
         buttonSelectImage = view.findViewById(R.id.buttonSelectImage);
@@ -96,41 +101,53 @@ public class CreateDiaryFragment extends Fragment {
         buttonReset = view.findViewById(R.id.buttonReset);
         ratingBarMood = view.findViewById(R.id.ratingBarMood);
 
-
+        // Set click listeners
         buttonCamera.setOnClickListener(v -> takePicture());
         buttonSelectImage.setOnClickListener(v -> showImageSourceDialog());
         buttonRecordAudio.setOnClickListener(v -> checkAudioPermissionsAndStartRecording());
         buttonStopAudio.setOnClickListener(v -> stopRecording());
         buttonPlaybackAudio.setOnClickListener(v -> playRecording());
         buttonSave.setOnClickListener(v -> checkLocationPermissionsAndSaveDiary());
-        buttonReset.setOnClickListener(v->resetInputs());
+        buttonReset.setOnClickListener(v -> resetInputs());
 
+        // Observe saving state
+        diaryViewModel.isSaving().observe(getViewLifecycleOwner(), isSaving -> {
+            if (isSaving) {
+                buttonSave.setEnabled(false);
+                buttonSave.setText(R.string.saving);
+            } else {
+                buttonSave.setEnabled(true);
+                buttonSave.setText(R.string.save_diary);
+            }
+        });
+
+        setupActivityResultLaunchers();
+    }
+
+    private void setupActivityResultLaunchers() {
         imageCaptureLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (imageUri != null) {
-                            Toast.makeText(requireContext(), "Image captured!", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(requireView(), "Image captured successfully", Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(requireContext(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(requireView(), "Failed to capture image", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
 
-
-
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == getActivity().RESULT_OK) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
                         if (result.getData() != null && result.getData().getData() != null) {
                             imageUri = result.getData().getData();
-                            Toast.makeText(requireContext(), "Image selected!", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(requireView(), "Image selected successfully", Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(requireContext(), "Failed to select image", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(requireView(), "Failed to select image", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
-
 
     private void checkLocationPermissionsAndSaveDiary() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -150,7 +167,7 @@ public class CreateDiaryFragment extends Fragment {
                     double longitude = location.getLongitude();
                     saveDiary(latitude, longitude);
                 } else {
-                    Toast.makeText(requireContext(), "Unable to retrieve location", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(requireView(), "Unable to retrieve location", Snackbar.LENGTH_SHORT).show();
                     // Save diary without location if location is not available
                     saveDiary(null, null);
                 }
@@ -158,15 +175,11 @@ public class CreateDiaryFragment extends Fragment {
         }
     }
 
-
-
-
     private void takePicture() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
         } else {
-            Toast.makeText(requireContext(), "No camera app found", Toast.LENGTH_SHORT).show();
+            dispatchTakePictureIntent();
         }
     }
 
@@ -177,15 +190,21 @@ public class CreateDiaryFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 dispatchTakePictureIntent();
             } else {
-                Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show();
+                Snackbar.make(requireView(), "Camera permission denied", Snackbar.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 saveDiaryWithLocation();
             } else {
-                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
+                Snackbar.make(requireView(), "Location permission denied", Snackbar.LENGTH_SHORT).show();
                 // Save diary without location if permission is denied
                 saveDiary(null, null);
+            }
+        } else if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startRecording();
+            } else {
+                Snackbar.make(requireView(), "Audio recording permission denied", Snackbar.LENGTH_SHORT).show();
             }
         }
     }
@@ -198,7 +217,7 @@ public class CreateDiaryFragment extends Fragment {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 Log.e(TAG, "Error creating image file", ex);
-                Toast.makeText(requireContext(), "Error creating image file", Toast.LENGTH_SHORT).show();
+                Snackbar.make(requireView(), "Error creating image file", Snackbar.LENGTH_SHORT).show();
             }
             if (photoFile != null) {
                 imageUri = FileProvider.getUriForFile(requireContext(), "com.example.snapdiaryv3.fileprovider", photoFile);
@@ -206,7 +225,7 @@ public class CreateDiaryFragment extends Fragment {
                 imageCaptureLauncher.launch(takePictureIntent);
             }
         } else {
-            Toast.makeText(requireContext(), "No camera app found", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "No camera app found", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -226,9 +245,6 @@ public class CreateDiaryFragment extends Fragment {
                 .show();
     }
 
-
-
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -239,10 +255,10 @@ public class CreateDiaryFragment extends Fragment {
                     // Save the image to storage or display it in your UI
                     saveImageToStorage(imageBitmap); // Example method to save image
                 } else {
-                    Toast.makeText(requireContext(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(requireView(), "Failed to capture image", Snackbar.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(requireContext(), "Failed to capture image", Toast.LENGTH_SHORT).show();
+                Snackbar.make(requireView(), "Failed to capture image", Snackbar.LENGTH_SHORT).show();
             }
         }
     }
@@ -250,7 +266,6 @@ public class CreateDiaryFragment extends Fragment {
     private void saveImageToStorage(Bitmap bitmap) {
         // Example: Save bitmap to a file or database, or display it in an ImageView
         // Here, you can save the bitmap to a specific directory or Firebase Storage
-
 
         // For saving to a directory in external storage:
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -269,10 +284,10 @@ public class CreateDiaryFragment extends Fragment {
             imageUri = Uri.fromFile(imageFile);
 
             // Notify user or perform any other necessary action
-            Toast.makeText(requireContext(), "Image saved successfully", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Image saved successfully", Snackbar.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), "Failed to save image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Failed to save image: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -287,7 +302,6 @@ public class CreateDiaryFragment extends Fragment {
                 storageDir      /* directory */
         );
     }
-
 
     private void dispatchPickPictureIntent() {
         Intent pickPictureIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -327,7 +341,7 @@ public class CreateDiaryFragment extends Fragment {
                 }
 
                 mediaRecorder.start();
-                Toast.makeText(requireContext(), "Recording started", Toast.LENGTH_SHORT).show();
+                Snackbar.make(requireView(), "Recording started", Snackbar.LENGTH_SHORT).show();
 
                 // Update UI
                 buttonRecordAudio.setVisibility(View.GONE);
@@ -342,7 +356,7 @@ public class CreateDiaryFragment extends Fragment {
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
-            Toast.makeText(requireContext(), "Recording stopped", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Recording stopped", Snackbar.LENGTH_SHORT).show();
 
             // Update UI
             buttonRecordAudio.setVisibility(View.VISIBLE);
@@ -352,15 +366,20 @@ public class CreateDiaryFragment extends Fragment {
     }
 
     private void playRecording() {
+        if (audioFilePath == null) {
+            Snackbar.make(requireView(), "No audio recording found", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(audioFilePath);
             mediaPlayer.prepare();
             mediaPlayer.start();
-            Toast.makeText(requireContext(), "Playing audio", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Playing audio", Snackbar.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(requireContext(), "Failed to play audio", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Failed to play audio", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -369,53 +388,45 @@ public class CreateDiaryFragment extends Fragment {
         float moodLevel = ratingBarMood.getRating();
 
         if (description.isEmpty()) {
-            Toast.makeText(requireContext(), "Description cannot be empty", Toast.LENGTH_SHORT).show();
+            Snackbar.make(requireView(), "Description cannot be empty", Snackbar.LENGTH_SHORT).show();
             return;
         }
 
-        String entryId = diaryRef.push().getKey();
-        if (entryId == null) {
-            Toast.makeText(requireContext(), "Failed to generate diary entry key", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Generate a unique ID for the entry
+        String entryId = UUID.randomUUID().toString();
 
         long timestamp = System.currentTimeMillis();
-        String audioUri = "some_uri";
         DiaryEntry diaryEntry = new DiaryEntry(description, moodLevel,
-                imageUri != null ? imageUri.toString() : null, audioFilePath, timestamp, audioFilePath, latitude, longitude); // Make sure audioFilePath is correctly set here
+                imageUri != null ? imageUri.toString() : null, 
+                audioFilePath != null ? "audio_uri" : null, 
+                timestamp, 
+                audioFilePath, 
+                latitude, 
+                longitude);
 
-        diaryRef.child(entryId).setValue(diaryEntry)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(requireContext(), "Diary entry saved successfully", Toast.LENGTH_SHORT).show();
-                    resetInputs(); // Clear inputs after saving
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(requireContext(), "Failed to save diary entry: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        // Save using ViewModel
+        diaryViewModel.saveDiaryEntry(diaryEntry, entryId);
+        
+        // Show success message and reset inputs
+        Snackbar.make(requireView(), "Diary entry saved successfully", Snackbar.LENGTH_SHORT).show();
+        resetInputs();
     }
 
     private void resetInputs() {
         // Clear text input
         editTextDescription.setText("");
         ratingBarMood.setRating(0);
-
-        // Reset image URI
+        
+        // Reset image and audio
         imageUri = null;
-
-        // Reset audio recording
-        stopRecording(); // Stop if recording is in progress
         audioFilePath = null;
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-
-        // Reset UI visibility for audio buttons
+        
+        // Reset UI state
         buttonRecordAudio.setVisibility(View.VISIBLE);
         buttonStopAudio.setVisibility(View.GONE);
         buttonPlaybackAudio.setVisibility(View.GONE);
-
-        Toast.makeText(requireContext(), "Inputs reset", Toast.LENGTH_SHORT).show();
+        
+        Snackbar.make(requireView(), "Inputs reset", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -431,4 +442,3 @@ public class CreateDiaryFragment extends Fragment {
         }
     }
 }
-

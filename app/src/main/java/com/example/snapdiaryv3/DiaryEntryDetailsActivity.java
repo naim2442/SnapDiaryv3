@@ -1,58 +1,48 @@
 package com.example.snapdiaryv3;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
-
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.snapdiaryv3.database.DiaryEntryEntity;
+import com.example.snapdiaryv3.viewmodel.DiaryViewModel;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
-public class DiaryEntryDetailsActivity extends AppCompatActivity implements DiaryAdapter.OnEntryClickListener  {
+public class DiaryEntryDetailsActivity extends AppCompatActivity {
 
-
-    private DiaryAdapter diaryAdapter;
+    private static final String TAG = "DiaryEntryDetailsActivity";
+    
     private FirebaseAuth mAuth;
-    private DatabaseReference diaryRef;
-    private String userId;
+    private DiaryViewModel diaryViewModel;
+    private String entryId;
 
     private TextView textViewDescription;
-
     private TextView textViewLocation;
     private RatingBar ratingBarMood;
     private ImageView imageViewPhoto;
     private TextView textViewTimestamp;
-    private Button buttonPlaybackAudio; // Changed to Button for playback
+    private MaterialButton buttonPlaybackAudio;
     private MediaPlayer mediaPlayer;
     private String audioFilePath;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +50,7 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
         setContentView(R.layout.fragment_diary_entry_details);
 
         mAuth = FirebaseAuth.getInstance();
-        userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
+        String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
         if (userId == null) {
             startActivity(new Intent(this, LoginActivity.class));
@@ -68,11 +58,10 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
             return;
         }
 
+        // Initialize ViewModel
+        diaryViewModel = new ViewModelProvider(this).get(DiaryViewModel.class);
 
-
-
-        diaryRef = FirebaseDatabase.getInstance().getReference("diaries").child(userId);
-
+        // Initialize UI components
         ImageButton buttonBack = findViewById(R.id.buttonBack);
         buttonBack.setOnClickListener(this::onBackButtonClick);
 
@@ -83,12 +72,12 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
         buttonPlaybackAudio = findViewById(R.id.buttonPlaybackAudio);
         textViewLocation = findViewById(R.id.textViewLocation);
 
-        String entryId = getIntent().getStringExtra("entryId");
+        entryId = getIntent().getStringExtra("entryId");
 
         if (entryId != null) {
             fetchEntryDetails(entryId);
         } else {
-            Toast.makeText(this, "Entry ID not found", Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), "Entry ID not found", Snackbar.LENGTH_SHORT).show();
             finish();
         }
 
@@ -96,75 +85,88 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
     }
 
     private void playRecording() {
-        if (audioFilePath == null) {
-            Toast.makeText(this, "Audio file path is null", Toast.LENGTH_SHORT).show();
+        if (audioFilePath == null || audioFilePath.isEmpty()) {
+            Snackbar.make(findViewById(android.R.id.content), "No audio file available", Snackbar.LENGTH_SHORT).show();
             return;
+        }
+
+        // Check if file exists
+        File audioFile = new File(audioFilePath);
+        if (!audioFile.exists()) {
+            Snackbar.make(findViewById(android.R.id.content), "Audio file not found", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Release previous MediaPlayer if it exists
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
         }
 
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(audioFilePath);
             mediaPlayer.prepare();
+            mediaPlayer.setOnCompletionListener(mp -> {
+                buttonPlaybackAudio.setIcon(getDrawable(R.drawable.ic_play_audio));
+                buttonPlaybackAudio.setText(R.string.play_audio);
+            });
             mediaPlayer.start();
-            Toast.makeText(this, "Playing audio", Toast.LENGTH_SHORT).show();
+            
+            // Update button to show playing state
+            buttonPlaybackAudio.setIcon(getDrawable(R.drawable.ic_stop));
+            buttonPlaybackAudio.setText("Stop");
+            
+            Snackbar.make(findViewById(android.R.id.content), "Playing audio", Snackbar.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Failed to play audio", Toast.LENGTH_SHORT).show();
+            Snackbar.make(findViewById(android.R.id.content), "Failed to play audio: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
         }
     }
 
-
     private void fetchEntryDetails(String entryId) {
-        diaryRef.child(entryId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                DiaryEntry entry = snapshot.getValue(DiaryEntry.class);
-                if (entry != null) {
-                    textViewDescription.setText(entry.getDescription());
-                    ratingBarMood.setRating(entry.getMoodLevel());
-                    if (entry.getImageUri() != null) {
-                        Glide.with(DiaryEntryDetailsActivity.this)
-                                .load(entry.getImageUri())
-                                .into(imageViewPhoto);
-                    } else {
-                        imageViewPhoto.setVisibility(View.GONE);
-                    }
-
-                    audioFilePath = entry.getAudioFilePath();
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                    String dateString = sdf.format(new Date(entry.getTimestamp()));
-                    textViewTimestamp.setText(dateString);
-
-                    // Display location if available
-                    if (entry.getLatitude() != null && entry.getLongitude() != null) {
-                        // Call GeocodingHelper to fetch location name
-                        GeocodingHelper.displayLocationName(DiaryEntryDetailsActivity.this, entry.getLatitude(), entry.getLongitude(), textViewLocation);
-                    } else {
-                        textViewLocation.setText("Location not available");
-                    }
-                } else {
-                    Toast.makeText(DiaryEntryDetailsActivity.this, "Entry not found", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(DiaryEntryDetailsActivity.this, "Failed to load entry details: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+        diaryViewModel.getDiaryEntryById(entryId).observe(this, entity -> {
+            if (entity != null) {
+                updateUI(entity);
+            } else {
+                // Try to fetch from Firebase if not in local database
+                Snackbar.make(findViewById(android.R.id.content), "Entry not found in local database", Snackbar.LENGTH_SHORT).show();
             }
         });
     }
 
+    private void updateUI(DiaryEntryEntity entity) {
+        textViewDescription.setText(entity.getDescription());
+        ratingBarMood.setRating(entity.getMoodLevel());
+        
+        if (entity.getImageUri() != null && !entity.getImageUri().isEmpty()) {
+            imageViewPhoto.setVisibility(View.VISIBLE);
+            Glide.with(this)
+                    .load(entity.getImageUri())
+                    .placeholder(R.drawable.placeholder_image)
+                    .error(R.drawable.placeholder_image)
+                    .into(imageViewPhoto);
+        } else {
+            imageViewPhoto.setVisibility(View.GONE);
+        }
 
+        audioFilePath = entity.getAudioFilePath();
+        if (audioFilePath != null && !audioFilePath.isEmpty()) {
+            buttonPlaybackAudio.setVisibility(View.VISIBLE);
+        } else {
+            buttonPlaybackAudio.setVisibility(View.GONE);
+        }
 
-    @Override
-    public void onEntryDetailsClicked(DiaryEntry entry) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String dateString = sdf.format(new Date(entity.getTimestamp()));
+        textViewTimestamp.setText(dateString);
 
-    }
-
-
-    public void onEntryClicked(DiaryEntry entry) {
-
+        // Display location if available
+        if (entity.getLatitude() != null && entity.getLongitude() != null) {
+            // Call GeocodingHelper to fetch location name
+            GeocodingHelper.displayLocationName(this, entity.getLatitude(), entity.getLongitude(), textViewLocation);
+        } else {
+            textViewLocation.setText("Location not available");
+        }
     }
 
     public void onBackButtonClick(View view) {
@@ -180,35 +182,22 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity implements Diar
         return super.onOptionsItemSelected(item);
     }
 
-
-
     @Override
-    public void onEntryDeleteClicked(int position) {
-        if (mAuth.getCurrentUser() != null) {
-            List<DiaryEntry> entries = diaryAdapter.getDiaryEntries();
-            if (entries != null && position >= 0 && position < entries.size()) {
-                DiaryEntry entryToDelete = entries.get(position);
-                String entryId = entryToDelete.getEntryId();
-
-                diaryRef.child(entryId).removeValue()
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(DiaryEntryDetailsActivity.this, "Diary entry deleted", Toast.LENGTH_SHORT).show();
-                            // Optionally, refresh your diary entries here if needed
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(DiaryEntryDetailsActivity.this, "Failed to delete diary entry: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-            } else {
-                Toast.makeText(DiaryEntryDetailsActivity.this, "Invalid entry position", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(DiaryEntryDetailsActivity.this, "User not authenticated", Toast.LENGTH_SHORT).show();
+    protected void onPause() {
+        super.onPause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+            buttonPlaybackAudio.setIcon(getDrawable(R.drawable.ic_play_audio));
+            buttonPlaybackAudio.setText(R.string.play_audio);
         }
     }
 
-
-
-
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
 }
-

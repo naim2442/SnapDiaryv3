@@ -1,159 +1,166 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
-
-
-    <View
-        android:id="@+id/spacerView"
-        android:layout_width="match_parent"
-        android:layout_height="77dp"
-        android:background="@android:color/transparent"
-        android:clickable="true"
-        android:visibility="invisible" />
-
-
-    <!-- Centered LinearLayout for Audio buttons -->
-
-
-    <EditText
-        android:id="@+id/editTextDescription"
-        android:layout_width="388dp"
-        android:layout_height="102dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="112dp"
-        android:gravity="start"
-        android:hint="Enter description"
-        android:inputType="textMultiLine"
-        android:padding="16dp" />
-
-    <RatingBar
-        android:id="@+id/ratingBarMood"
-        style="@style/CustomRatingBar"
-        android:layout_width="381dp"
-        android:layout_height="63dp"
-        android:layout_below="@id/editTextDescription"
-        android:layout_marginTop="23dp"
-        android:numStars="5"
-        android:padding="16dp"
-        android:rating="0"
-        android:stepSize="1" />
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/linearLayoutButtons"
-        android:layout_width="383dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/ratingBarMood"
-        android:layout_marginTop="11dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="16dp">
 
-        <Button
-            android:id="@+id/buttonCamera"
-            style="@style/LightBlueButtonStyle"
-            android:layout_width="wrap_content"
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Take Picture" />
+            android:text="Create New Diary Entry"
+            android:textAppearance="@style/TextAppearance.SnapDiary.HeadlineMedium"
+            android:layout_marginBottom="24dp"/>
 
-        <Button
-            android:id="@+id/buttonSelectImage"
-            style="@style/LightBlueButtonStyle"
+        <!-- Description Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="What's on your mind today?"
+            style="@style/DiaryInputField">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:gravity="top|start" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Mood Selection -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="How are you feeling?"
+            android:textAppearance="@style/TextAppearance.SnapDiary.BodyLarge"
+            android:layout_marginBottom="8dp"/>
+
+        <RatingBar
+            android:id="@+id/ratingBarMood"
+            style="@style/CustomRatingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:baselineAligned="false"
-            android:padding="16dp"
-            android:text="Select Image" />
+            android:layout_gravity="center_horizontal"
+            android:numStars="5"
+            android:rating="0"
+            android:stepSize="1"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Media Section -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            style="@style/DiaryCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Add Media"
+                    android:textAppearance="@style/TextAppearance.SnapDiary.BodyLarge"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Image Buttons -->
+                <LinearLayout
+                    android:id="@+id/linearLayoutButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonCamera"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Take Picture"
+                        app:icon="@drawable/ic_camera"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_marginEnd="8dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonSelectImage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select Image"
+                        app:icon="@drawable/ic_gallery"
+                        style="@style/Widget.Material3.Button.OutlinedButton"/>
+                </LinearLayout>
+
+                <!-- Audio Buttons -->
+                <LinearLayout
+                    android:id="@+id/LinearLayoutAudio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonRecordAudio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Record Audio"
+                        app:icon="@drawable/ic_mic"
+                        style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonStopAudio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Stop Recording"
+                        app:icon="@drawable/ic_stop"
+                        android:visibility="gone"
+                        style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonPlaybackAudio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Play Audio"
+                        app:icon="@drawable/ic_play_audio"
+                        android:visibility="gone"
+                        style="@style/Widget.Material3.Button.OutlinedButton"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset"
+                android:layout_marginEnd="8dp"
+                style="@style/Widget.Material3.Button.TextButton"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save Diary"
+                app:icon="@drawable/ic_save"
+                style="@style/Widget.Material3.Button"/>
+        </LinearLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/LinearLayoutAudio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/linearLayoutButtons"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="4dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:padding="16dp">
-
-        <Button
-            android:id="@+id/buttonRecordAudio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Record Audio"
-            style="@style/LightBlueButtonStyle"/>
-
-        <Button
-            android:id="@+id/buttonStopAudio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Stop Recording"
-            android:visibility="gone"
-            style="@style/LightBlueButtonStyle"/>
-
-        <Button
-            android:id="@+id/buttonPlaybackAudio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Playback Audio"
-            android:visibility="gone"
-            style="@style/LightBlueButtonStyle"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/LinearLayoutSave"
-        android:layout_width="386dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/linearLayoutButtons"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="98dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:padding="0dp">
-
-        <Button
-            android:id="@+id/buttonSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/LinearLayoutAudio"
-            android:layout_marginTop="16dp"
-            android:padding="16dp"
-            android:text="Save Diary"
-            style="@style/LightBlueButtonStyle"/>
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/LinearLayoutReset"
-        android:layout_width="383dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/linearLayoutButtons"
-        android:layout_centerVertical="true"
-        android:layout_marginTop="180dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:padding="0dp">
-
-        <Button
-            android:id="@+id/buttonReset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonSave"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:onClick="resetInputs"
-            android:text="Reset"
-            style="@style/LightBlueButtonStyle"/>
-
-
-    </LinearLayout>
-
-
-</RelativeLayout>
+</androidx.core.widget.NestedScrollView>

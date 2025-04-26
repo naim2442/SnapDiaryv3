@@ -1,6 +1,42 @@
 <resources>
-    <string name="app_name">SnapDiaryv3</string>
+    <string name="app_name">SnapDiary</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Button text -->
+    <string name="save_diary">Save Diary</string>
+    <string name="saving">Saving…</string>
+    <string name="reset">Reset</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="select_image">Select Image</string>
+    <string name="record_audio">Record Audio</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="play_audio">Play Audio</string>
+
+    <!-- Messages -->
+    <string name="diary_saved">Diary entry saved successfully</string>
+    <string name="diary_save_failed">Failed to save diary entry</string>
+    <string name="empty_description">Description cannot be empty</string>
+    <string name="inputs_reset">Inputs reset</string>
+    <string name="no_camera">No camera app found</string>
+    <string name="image_captured">Image captured successfully</string>
+    <string name="image_capture_failed">Failed to capture image</string>
+    <string name="image_selected">Image selected successfully</string>
+    <string name="image_selection_failed">Failed to select image</string>
+    <string name="recording_started">Recording started</string>
+    <string name="recording_stopped">Recording stopped</string>
+    <string name="playing_audio">Playing audio</string>
+    <string name="play_audio_failed">Failed to play audio</string>
+    <string name="no_audio">No audio recording found</string>
+    <string name="location_unavailable">Unable to retrieve location</string>
+
+    <!-- Permissions -->
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="audio_permission_denied">Audio recording permission denied</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
