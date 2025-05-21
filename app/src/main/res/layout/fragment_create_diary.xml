@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/spacing_medium">
 
         <!-- Header -->
         <TextView
@@ -17,13 +17,13 @@
             android:layout_height="wrap_content"
             android:text="Create New Diary Entry"
             android:textAppearance="@style/TextAppearance.SnapDiary.HeadlineMedium"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="@dimen/spacing_large"/>
 
         <!-- Description Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_medium"
             android:hint="What's on your mind today?"
             style="@style/DiaryInputField">
 
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:text="How are you feeling?"
             android:textAppearance="@style/TextAppearance.SnapDiary.BodyLarge"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="@dimen/spacing_small"/>
 
         <RatingBar
             android:id="@+id/ratingBarMood"
@@ -53,27 +53,27 @@
             android:numStars="5"
             android:rating="0"
             android:stepSize="1"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="@dimen/spacing_large"/>
 
         <!-- Media Section -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="@dimen/spacing_large"
             style="@style/DiaryCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_medium">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Add Media"
                     android:textAppearance="@style/TextAppearance.SnapDiary.BodyLarge"
-                    android:layout_marginBottom="16dp"/>
+                    android:layout_marginBottom="@dimen/spacing_medium"/>
 
                 <!-- Image Buttons -->
                 <LinearLayout
@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="@dimen/spacing_medium">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonCamera"
@@ -91,7 +91,7 @@
                         android:text="Take Picture"
                         app:icon="@drawable/ic_camera"
                         style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_marginEnd="8dp"/>
+                        android:layout_marginEnd="@dimen/spacing_small"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonSelectImage"
@@ -151,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Reset"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="@dimen/spacing_small"
                 style="@style/Widget.Material3.Button.TextButton"/>
 
             <com.google.android.material.button.MaterialButton

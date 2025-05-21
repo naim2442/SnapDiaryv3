@@ -30,7 +30,7 @@
         <item name="colorOnSurface">@color/on_surface</item>
         
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
         
         <!-- Customize typography -->
         <item name="textAppearanceHeadlineLarge">@style/TextAppearance.SnapDiary.HeadlineLarge</item>

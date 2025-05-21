@@ -29,6 +29,45 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_diary_entry" />
 
+        <LinearLayout
+            android:id="@+id/empty_state_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="@dimen/spacing_large"
+            tools:visibility="visible"> <!-- Added tools:visibility for preview -->
+
+            <ImageView
+                android:id="@+id/empty_state_icon"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/ic_empty_journal_placeholder"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:id="@+id/empty_state_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_home_message"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:gravity="center"
+                android:textAlignment="center"/>
+
+            <!-- Optional: Button for direct action from empty state -->
+            <!-- <com.google.android.material.button.MaterialButton
+                android:id="@+id/empty_state_create_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:text="@string/empty_home_create_entry_button"
+                app:icon="@drawable/ic_add_circle_outline" /> -->
+        </LinearLayout>
+
     </LinearLayout>
 
 

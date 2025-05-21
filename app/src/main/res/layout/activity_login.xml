@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C495B">
+    android:background="?attr/colorSurface">
 
     <ImageButton
         android:id="@+id/backButton"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="Sign In"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="24sp"
         app:layout_constraintTop_toBottomOf="@id/logo"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,8 +50,8 @@
         android:inputType="textEmailAddress"
         android:background="@drawable/edit_text_background"
         android:padding="12dp"
-        android:textColor="#000000"
-        android:textColorHint="#737373"
+        android:textColor="?attr/colorOnSurface"
+        android:textColorHint="?attr/colorOnSurfaceVariant"
         app:layout_constraintTop_toBottomOf="@id/title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -66,8 +66,8 @@
         android:inputType="textPassword"
         android:background="@drawable/edit_text_background"
         android:padding="12dp"
-        android:textColor="#000000"
-        android:textColorHint="#737373"
+        android:textColor="?attr/colorOnSurface"
+        android:textColorHint="?attr/colorOnSurfaceVariant"
         app:layout_constraintTop_toBottomOf="@id/editText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -93,7 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="© Sarsab Technology"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

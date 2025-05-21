@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="nav_drawer_width">0dp</dimen> <!-- Adjust this value as needed -->
+    <dimen name="nav_drawer_width">280dp</dimen> <!-- Adjust this value as needed -->
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
 </resources>

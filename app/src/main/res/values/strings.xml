@@ -46,4 +46,8 @@
     <string name="menu_mood_tracker">Mood Tracker</string>
     <string name="menu_map_tracker">Map Tracker</string>
     <string name="menu_user_profile">User Profile</string>
+
+    <!-- Empty State -->
+    <string name="empty_home_message">Your journal is waiting for your thoughts. Tap the button below to create your first entry!</string>
+    <string name="empty_home_create_entry_button">Create First Entry</string>
 </resources>
